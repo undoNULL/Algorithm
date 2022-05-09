@@ -106,6 +106,8 @@ struct node {
 };
 struct cmp {
 	bool operator()(node t, node u) {
+		if (t.G == u.G)
+			return t.H > u.H;
 		return t.G > u.G;
 	}
 };
@@ -123,14 +125,16 @@ void bfs(pair<int, int> start, pair<int, int> end, int w, int h) {
 		x = cur.x;
 		y = cur.y;
 		pq.pop();
-		if (end.first == x && end.second == y)
-			break;
+		
 		for (int i = 0; i < 4; i++) {
 			nX = x + xx[i];
 			nY = y + yy[i];
 			if (inRange(nX, 0, w) && inRange(nY, 0, h)) {
 				if (visit[nY][nX] == 0) {
 					visit[nY][nX] = visit[y][x] + MIN(map[nY][nX] + 1 - visit[y][x], 0);
+					if (end.first == nX && end.second == nY)
+						return;
+
 					pq.push({ nX, nY, visit[nY][nX], (ABS(nX - end.first) + ABS(nY - end.second)) });
 				}
 			}
