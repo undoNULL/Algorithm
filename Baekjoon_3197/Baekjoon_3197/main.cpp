@@ -1,8 +1,10 @@
 #include<iostream>
+#include<vector>
 #include<queue>
 using namespace std;
 
 #define MIN(val, min) (((val)>(min))?(val):(min))
+#define ABS(val) ((val<0)?(-val):(val))
 
 int map[1501][1501] = { 0, };
 int visit[1501][1501] = { 0, };
@@ -96,19 +98,30 @@ void setMapIceMeltTime(int w, int h) {
 	}
 }
 
+struct node {
+	int x;
+	int y;
+	int G;
+	int H;
+};
+struct cmp {
+	bool operator()(node t, node u) {
+		return t.G > u.G;
+	}
+};
+
 void bfs(pair<int, int> start, pair<int, int> end, int w, int h) {
 	int xx[4] = { 1, 0 ,-1, 0 };
 	int yy[4] = { 0,-1,0,1 };
-	priority_queue<pair<int, pair<int, int>>> pq; //greater ÇÊ¿ä
-	//queue<pair<int, int>> pq;
-	pair<int, int> cur;
+	priority_queue<node, vector<node>, cmp> pq;
+	node cur;
 	int x = start.first, y = start.second, nX, nY;
 	visit[y][x] = 1;
-	pq.push({ visit[y][x], { x, y } });
+	pq.push({x, y, visit[y][x], (ABS(x-end.first)+ABS(y-end.second))});
 	while (!pq.empty()) {
 		cur = pq.top();
-		x = cur.first;
-		y = cur.second;
+		x = cur.x;
+		y = cur.y;
 		pq.pop();
 		if (end.first == x && end.second == y)
 			break;
@@ -116,11 +129,10 @@ void bfs(pair<int, int> start, pair<int, int> end, int w, int h) {
 			nX = x + xx[i];
 			nY = y + yy[i];
 			if (inRange(nX, 0, w) && inRange(nY, 0, h)) {
-				if (visit[nY][nX] != 0)
-					continue;
-				//visit[nY][nX] = visit[y][x]; //map[nY][nX]+1;
-				visit[nY][nX] = visit[y][x] + MIN(map[nY][nX]+1 - visit[y][x], 0);
-				pq.push({visit[nY][nX], { nX,nY } });
+				if (visit[nY][nX] == 0) {
+					visit[nY][nX] = visit[y][x] + MIN(map[nY][nX] + 1 - visit[y][x], 0);
+					pq.push({ nX, nY, visit[nY][nX], (ABS(nX - end.first) + ABS(nY - end.second)) });
+				}
 			}
 		}
 	}
@@ -128,6 +140,8 @@ void bfs(pair<int, int> start, pair<int, int> end, int w, int h) {
 
 
 int main() {
+	cin.tie(0);
+	ios::sync_with_stdio(false);
 	int w, h;
 	pair<int, int> swan[2] = { {-1,-1},{-1,-1} };
 	cin >> h >> w;
@@ -139,5 +153,5 @@ int main() {
 	debug_printMap(w, h);
 	cout << endl << "Visit";
 	debug_printVisit(w, h);
-
+	cout << visit[swan[1].second][swan[1].first]-1 << endl;
 }
